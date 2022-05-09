@@ -1,0 +1,69 @@
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+name: Continuous integration
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: clippy
+          override: true
+      - uses: Swatinem/rust-cache@v1.4.0
+        with:
+          cache-on-failure: true
+      - name: Clippy
+        env:
+          SQLX_OFFLINE: 1
+        run: cargo clippy -- -D warnings
+
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt
+          override: true
+      - name: Format
+        run: cargo fmt --all -- --check
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    container: { image: "rust" }
+    env:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/test-tv-quotes-api
+      TEST_DATABASE_URL: postgres://postgres:postgres@postgres:5432/test-tv-quotes-api
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test-tv-quotes-api
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v1.4.0
+        with:
+          cache-on-failure: true
+      - name: Run tests
+        env:
+          SQLX_OFFLINE: 1
+        run: |
+          cargo test -- --test-threads=1
