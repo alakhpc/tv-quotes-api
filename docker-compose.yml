@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  postgres:
+  quotes_postgres:
     image: postgres
     container_name: tv-quotes-api-postgres
     hostname: tv-quotes-api-postgres
@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: secretPassword
       POSTGRES_DB: postgres
 
-  tv-quotes-api:
+  quotes_api:
     container_name: tv-quotes-api
     hostname: tv-quotes-api
     build: .
