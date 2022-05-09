@@ -5,6 +5,8 @@ services:
     image: postgres
     container_name: tv-quotes-api-postgres
     hostname: tv-quotes-api-postgres
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secretPassword

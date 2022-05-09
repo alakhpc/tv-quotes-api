@@ -1,5 +1,6 @@
 src/data/quotes/*
 
+postgres
 .env
 scrape.py
 add_to_db.py
