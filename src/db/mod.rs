@@ -1,3 +1,4 @@
+use anyhow::{anyhow, bail, Result};
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
@@ -14,7 +15,7 @@ pub struct Quote {
 pub async fn get_quotes_from_random_show(
     limit: usize,
     pool: &Pool<Postgres>,
-) -> Result<Vec<Quote>, sqlx::Error> {
+) -> Result<Vec<Quote>> {
     let mut quotes = Vec::with_capacity(limit);
     for _ in 0..limit {
         quotes.push(_get_quote_from_random_show(pool));
@@ -23,39 +24,37 @@ pub async fn get_quotes_from_random_show(
     join_all(quotes).await.into_iter().collect()
 }
 
-async fn _get_quote_from_random_show(pool: &Pool<Postgres>) -> Result<Quote, sqlx::Error> {
+async fn _get_quote_from_random_show(pool: &Pool<Postgres>) -> Result<Quote> {
     let id = sqlx::query_file!("./src/db/get_random_id.sql")
         .fetch_one(pool)
         .await?
-        .id;
+        .id
+        .ok_or_else(|| anyhow!("Could not get random id from database"))? as i32;
 
-    let id = match id {
-        Some(id) => id,
-        None => return Err(sqlx::Error::RowNotFound),
-    } as i32;
-
-    sqlx::query_file_as!(Quote, "./src/db/get_quote_by_id.sql", id)
+    let quote = sqlx::query_file_as!(Quote, "./src/db/get_quote_by_id.sql", id)
         .fetch_one(pool)
-        .await
+        .await?;
+
+    Ok(quote)
 }
 
 pub async fn get_quotes_from_show(
     show: &str,
     limit: i64,
     pool: &Pool<Postgres>,
-) -> Result<Vec<Quote>, sqlx::Error> {
+) -> Result<Vec<Quote>> {
     let result = sqlx::query_file_as!(Quote, "./src/db/get_quote_from_show.sql", show, limit)
         .fetch_all(pool)
         .await?;
 
     if result.is_empty() {
-        return Err(sqlx::Error::RowNotFound);
+        bail!("No quotes found for show {}", show);
     }
 
     Ok(result)
 }
 
-pub async fn get_shows(pool: &Pool<Postgres>) -> Result<Vec<String>, sqlx::Error> {
+pub async fn get_shows(pool: &Pool<Postgres>) -> Result<Vec<String>> {
     let shows = sqlx::query_file!("./src/db/get_shows.sql")
         .fetch_all(pool)
         .await?
@@ -66,7 +65,7 @@ pub async fn get_shows(pool: &Pool<Postgres>) -> Result<Vec<String>, sqlx::Error
     Ok(shows)
 }
 
-pub async fn get_quotes_number(pool: &Pool<Postgres>) -> Result<i32, sqlx::Error> {
+pub async fn get_quotes_number(pool: &Pool<Postgres>) -> Result<i32> {
     let count = sqlx::query_file!("./src/db/get_quotes_number.sql")
         .fetch_one(pool)
         .await?
