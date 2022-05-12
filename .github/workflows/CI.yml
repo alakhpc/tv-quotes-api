@@ -62,8 +62,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1.4.0
         with:
           cache-on-failure: true
+      - name: Seed database
+        run: cargo seed
       - name: Run tests
-        env:
-          SQLX_OFFLINE: 1
-        run: |
-          cargo test -- --test-threads=1
+        run: cargo test

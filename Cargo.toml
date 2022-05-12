@@ -2,6 +2,7 @@
 name = "tv-quotes-api"
 version = "1.0.0"
 edition = "2021"
+default-run = "tv-quotes-api"
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3

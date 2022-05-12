@@ -1,2 +1,2 @@
 [alias]
-t = "test -- --test-threads=1"
+seed  = "run --bin seed"
