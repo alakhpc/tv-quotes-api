@@ -12,9 +12,7 @@ use actix_web::{
 use dotenv::dotenv;
 use lazy_static::lazy_static;
 use serde::de::DeserializeOwned;
-use serde_json::Value as JsonValue;
-use sqlx::{Executor, PgPool, Pool, Postgres};
-use std::sync::Mutex;
+use sqlx::PgPool;
 
 lazy_static! {
     static ref SEED_STR: &'static str = include_str!("./db/seed.json");
@@ -23,19 +21,14 @@ lazy_static! {
 
 lazy_static! {
     static ref DATABASE_URL: String = std::env::var("TEST_DATABASE_URL").unwrap();
-    static ref POOL: Mutex<Option<Pool<Postgres>>> = Mutex::new(None);
 }
 
 pub async fn get_service() -> impl Service<Request, Response = ServiceResponse, Error = Error> {
     dotenv().ok();
 
-    let pool = {
-        let mut pool = POOL.lock().unwrap();
-        if pool.is_none() {
-            *pool = Some(get_pool().await);
-        }
-        pool.clone().unwrap()
-    };
+    let pool = PgPool::connect(&DATABASE_URL)
+        .await
+        .expect("Failed to connect to database");
 
     let state = AppState::new(pool).await;
     test::init_service(App::new().configure(routes::init_routes).app_data(state)).await
@@ -58,29 +51,4 @@ where
     let json_body = test::read_body_json(resp).await;
 
     (status, json_body)
-}
-
-async fn get_pool() -> Pool<Postgres> {
-    let pool = PgPool::connect(&DATABASE_URL)
-        .await
-        .expect("Failed to connect to database");
-
-    pool.execute(include_str!("./db/reset.sql"))
-        .await
-        .expect("Database reset failed");
-
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .expect("Migrations failed");
-
-    let seed_json: JsonValue = serde_json::from_str(&SEED_STR).unwrap();
-
-    sqlx::query(include_str!("./db/seed.sql"))
-        .bind(seed_json)
-        .execute(&pool)
-        .await
-        .expect("Seed failed");
-
-    pool
 }
