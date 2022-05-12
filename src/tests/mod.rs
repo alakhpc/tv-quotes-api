@@ -15,8 +15,8 @@ use serde::de::DeserializeOwned;
 use sqlx::PgPool;
 
 lazy_static! {
-    static ref SEED_STR: &'static str = include_str!("./db/seed.json");
-    pub static ref QUOTES: Vec<Quote> = serde_json::from_str(&SEED_STR).unwrap();
+    pub static ref QUOTES: Vec<Quote> =
+        serde_json::from_str(include_str!("./db/seed.json")).unwrap();
 }
 
 lazy_static! {
