@@ -18,6 +18,82 @@
     },
     "query": "SELECT\n    DISTINCT show\nfrom\n    quotes;"
   },
+  "67dd5dcbe67361749b6b01b1f8172c4ce799f93beef7936f1850a6787b2f153c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "show",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "character",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT\n    *\nFROM\n    quotes\nWHERE\n    \"text\" NOT LIKE E'%\\n%'\nORDER BY\n    random()\nLIMIT\n    $1\n"
+  },
+  "6db7aef45ac20eefe6482c0013e6551f4764d6a264372a62202ba8e89b263170": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "show",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "character",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "text",
+          "ordinal": 3,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT\n    *\nFROM\n    quotes\nORDER BY\n    random()\nLIMIT\n    $1"
+  },
   "893f54ab63905f44f36cf8c7928ffcd199c4db2eb4d7dbbcf6ea1e6bff1a0b21": {
     "describe": {
       "columns": [
@@ -57,7 +133,7 @@
     },
     "query": "SELECT\n    *\nFROM\n    quotes\nWHERE\n    lower(show) = lower($1)\nORDER BY\n    random()\nLIMIT\n    $2"
   },
-  "bf2ef3faa1106488aa0d69fa45a9226caa3c45a7c85c5bfc03e303c2d15fabf3": {
+  "b0fb84b4478f015a0325bca25a0a6b6f5a32f0110ccf1261cf2ac7c016e7cd52": {
     "describe": {
       "columns": [
         {
@@ -89,29 +165,12 @@
       ],
       "parameters": {
         "Left": [
-          "Int4"
+          "Text",
+          "Int8"
         ]
       }
     },
-    "query": "SELECT\n    *\nFROM\n    quotes\nWHERE\n    id = $1"
-  },
-  "cb992c73495084b49dca2973282d389482d2219177fc263ec6bfcb8df7058429": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Float8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT\n    CEILING(\n        random() * (\n            SELECT\n                MAX(id)\n            from\n                quotes\n        )\n    ) as id"
+    "query": "SELECT\n    *\nFROM\n    quotes\nWHERE\n    lower(SHOW) = lower($1)\n    AND \"text\" NOT LIKE E'%\\n%'\nORDER BY\n    random()\nLIMIT\n    $2\n"
   },
   "d3dd73a2afc2c160a9a6b9dc4f87ef80ac081e7bad618cd70dd64ebf0382cbeb": {
     "describe": {
