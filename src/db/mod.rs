@@ -1,5 +1,4 @@
-use anyhow::{anyhow, bail, Result};
-use futures::future::join_all;
+use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -13,39 +12,43 @@ pub struct Quote {
 }
 
 pub async fn get_quotes_from_random_show(
-    limit: usize,
+    limit: i64,
+    short: bool,
     pool: &Pool<Postgres>,
 ) -> Result<Vec<Quote>> {
-    let mut quotes = Vec::with_capacity(limit);
-    for _ in 0..limit {
-        quotes.push(_get_quote_from_random_show(pool));
-    }
+    let quotes = if short {
+        sqlx::query_file_as!(Quote, "./src/db/get_quotes_short.sql", limit)
+            .fetch_all(pool)
+            .await?
+    } else {
+        sqlx::query_file_as!(Quote, "./src/db/get_quotes.sql", limit)
+            .fetch_all(pool)
+            .await?
+    };
 
-    join_all(quotes).await.into_iter().collect()
-}
-
-async fn _get_quote_from_random_show(pool: &Pool<Postgres>) -> Result<Quote> {
-    let id = sqlx::query_file!("./src/db/get_random_id.sql")
-        .fetch_one(pool)
-        .await?
-        .id
-        .ok_or_else(|| anyhow!("Could not get random id from database"))? as i32;
-
-    let quote = sqlx::query_file_as!(Quote, "./src/db/get_quote_by_id.sql", id)
-        .fetch_one(pool)
-        .await?;
-
-    Ok(quote)
+    Ok(quotes)
 }
 
 pub async fn get_quotes_from_show(
     show: &str,
     limit: i64,
+    short: bool,
     pool: &Pool<Postgres>,
 ) -> Result<Vec<Quote>> {
-    let result = sqlx::query_file_as!(Quote, "./src/db/get_quote_from_show.sql", show, limit)
+    let result = if short {
+        sqlx::query_file_as!(
+            Quote,
+            "./src/db/get_quotes_from_show_short.sql",
+            show,
+            limit
+        )
         .fetch_all(pool)
-        .await?;
+        .await?
+    } else {
+        sqlx::query_file_as!(Quote, "./src/db/get_quotes_from_show.sql", show, limit)
+            .fetch_all(pool)
+            .await?
+    };
 
     if result.is_empty() {
         bail!("No quotes found for show {}", show);
