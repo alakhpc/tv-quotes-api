@@ -62,11 +62,12 @@ Get all the available shows.
 }
 ```
 
-### `GET /quotes?show={show}`
+### `GET /quotes?show={show}?short={short}`
 
 Get a random quote from a show.
-
 Picks a random show if not specified.
+
+Returns only one-line quotes if short is true. Defaults to false
 
 > https://quotes.alakhpc.com/quotes
 
@@ -81,8 +82,9 @@ Picks a random show if not specified.
 ### `GET /quotes/{number}?show={show}`
 
 Get `{number}` random quotes from a show.
-
 Picks random shows if not specified.
+
+Returns only one-line quotes if short is true. Defaults to false
 
 **Max of 10 quotes at a time.**
 
