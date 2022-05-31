@@ -62,7 +62,7 @@ Get all the available shows.
 }
 ```
 
-### `GET /quotes?show={show}?short={short}`
+### `GET /quotes?show={show}&short={short}`
 
 Get a random quote from a show.
 Picks a random show if not specified.
@@ -79,7 +79,7 @@ Returns only one-line quotes if short is true. Defaults to false
 }
 ```
 
-### `GET /quotes/{number}?show={show}`
+### `GET /quotes/{number}?show={show}&short={short}`
 
 Get `{number}` random quotes from a show.
 Picks random shows if not specified.
