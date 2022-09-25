@@ -1,10 +1,7 @@
-version: '3'
-
 services:
-  quotes_postgres:
+  database:
     image: postgres
     container_name: tv-quotes-api-postgres
-    hostname: tv-quotes-api-postgres
     volumes:
       - ./postgres:/var/lib/postgresql/data
     environment:
@@ -12,11 +9,13 @@ services:
       POSTGRES_PASSWORD: secretPassword
       POSTGRES_DB: postgres
 
-  quotes_api:
+  api:
     container_name: tv-quotes-api
-    hostname: tv-quotes-api
     build: .
-    ports:
-      - "8080:8080"
     environment:
       - DATABASE_URL=postgres://postgres:secretPassword@tv-quotes-api-postgres:5432/postgres
+
+networks:
+  default:
+    name: nginx
+    external: true
