@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tv-quotes-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-31",
+  "compatibility_flags": ["nodejs_compat"],
+  "placement": {
+    "region": "aws:ca-central-1",
+  },
+  "observability": {
+    "enabled": true,
+  },
+}
